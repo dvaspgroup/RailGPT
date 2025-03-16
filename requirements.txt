@@ -1,0 +1,16 @@
+streamlit
+google-cloud-storage
+google-cloud-firestore
+google-auth
+firebase-admin
+google-generativeai
+sentence-transformers
+pdfplumber
+PyMuPDF
+pdf2image
+requests
+beautifulsoup4
+faiss-cpu
+google-cloud-vision
+pandas
+numpy
