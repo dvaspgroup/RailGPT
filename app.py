@@ -9,6 +9,7 @@ import datetime
 import io
 import logging
 import requests
+import json  # Add this import
 from sentence_transformers import SentenceTransformer
 from bs4 import BeautifulSoup
 from google.cloud import vision, storage
@@ -18,18 +19,24 @@ from firebase_admin import credentials, firestore, auth
 from pdf2image import convert_from_path
 
 # -------------------- Firebase Initialization --------------------
-FIREBASE_CREDENTIALS_PATH = "C:/Users/sanja/firebase_credentials.json"
-STORAGE_BUCKET_NAME = "railchatbot-cb553.appspot.com"
-
-# Initialize Firebase if not already initialized
+# Load Firebase credentials from Streamlit Secrets
 if not firebase_admin._apps:
-    cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
-    firebase_admin.initialize_app(cred)
+    try:
+        # Parse the JSON string from secrets.toml
+        firebase_creds = json.loads(st.secrets["FIREBASE_CREDENTIALS"])
+        # Initialize Firebase with the credentials
+        cred = credentials.Certificate(firebase_creds)
+        firebase_admin.initialize_app(cred)
+    except Exception as e:
+        st.error(f"Failed to initialize Firebase: {e}")
+        st.stop()
 
 # Initialize Firebase Storage
-storage_client = storage.Client.from_service_account_json(FIREBASE_CREDENTIALS_PATH)
+STORAGE_BUCKET_NAME = "railchatbot-cb553.appspot.com"
+storage_client = storage.Client.from_service_account_info(firebase_creds)
 bucket = storage_client.bucket(STORAGE_BUCKET_NAME)
 
+# Initialize Firestore
 db = firestore.client()
 
 # -------------------- Gemini AI Setup --------------------
