@@ -1,15 +1,10 @@
-import streamlit as st
-import google.generativeai as genai
-import fitz  # PyMuPDF
-import pdfplumber
-import faiss
 import os
 import pickle
 import datetime
 import io
 import logging
 import requests
-import json  # Add this import
+import json
 from sentence_transformers import SentenceTransformer
 from bs4 import BeautifulSoup
 from google.cloud import vision, storage
@@ -18,15 +13,30 @@ import firebase_admin
 from firebase_admin import credentials, firestore, auth
 from pdf2image import convert_from_path
 
-# -------------------- Firebase Initialization --------------------
-# Load Firebase credentials from Streamlit Secrets
-firebase_creds = None  # Define the variable in the global scope
+# Debug: Print the entire secrets object
+st.write("Secrets:", st.secrets)
 
+# Debug: Check if FIREBASE_CREDENTIALS exists
+if "FIREBASE_CREDENTIALS" not in st.secrets:
+    st.error("FIREBASE_CREDENTIALS not found in secrets.toml.")
+    st.stop()
+
+# Debug: Print the FIREBASE_CREDENTIALS value
+st.write("FIREBASE_CREDENTIALS:", st.secrets["FIREBASE_CREDENTIALS"])
+
+# Parse the JSON string from secrets.toml
+try:
+    firebase_creds = json.loads(st.secrets["FIREBASE_CREDENTIALS"])
+except Exception as e:
+    st.error(f"Failed to parse Firebase credentials: {e}")
+    st.stop()
+
+# Debug: Print the parsed credentials
+st.write("Parsed Firebase Credentials:", firebase_creds)
+
+# Initialize Firebase
 if not firebase_admin._apps:
     try:
-        # Parse the JSON string from secrets.toml
-        firebase_creds = json.loads(st.secrets["FIREBASE_CREDENTIALS"])
-        # Initialize Firebase with the credentials
         cred = credentials.Certificate(firebase_creds)
         firebase_admin.initialize_app(cred)
     except Exception as e:
@@ -36,8 +46,6 @@ if not firebase_admin._apps:
 # Initialize Firebase Storage
 STORAGE_BUCKET_NAME = "railchatbot-cb553.appspot.com"
 try:
-    if firebase_creds is None:
-        raise ValueError("Firebase credentials are not defined.")
     storage_client = storage.Client.from_service_account_info(firebase_creds)
     bucket = storage_client.bucket(STORAGE_BUCKET_NAME)
 except Exception as e:
