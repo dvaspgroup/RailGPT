@@ -1,4 +1,9 @@
-import streamlit as st  # Add this line at the top
+import streamlit as st  # Must be the first import
+
+# Set page config as the first Streamlit command
+st.set_page_config(page_title="RaiLChatbot", layout="wide")
+
+# Now you can proceed with the rest of your code
 import google.generativeai as genai
 import fitz  # PyMuPDF
 import pdfplumber
