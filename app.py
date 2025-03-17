@@ -1,3 +1,8 @@
+import streamlit as st  # Add this line at the top
+import google.generativeai as genai
+import fitz  # PyMuPDF
+import pdfplumber
+import faiss
 import os
 import pickle
 import datetime
