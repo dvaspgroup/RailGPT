@@ -23,26 +23,17 @@ import firebase_admin
 from firebase_admin import credentials, firestore, auth
 from pdf2image import convert_from_path
 
-# Debug: Print the entire secrets object
-st.write("Secrets:", st.secrets)
-
-# Debug: Check if FIREBASE_CREDENTIALS exists
+# Check if FIREBASE_CREDENTIALS exists
 if "FIREBASE_CREDENTIALS" not in st.secrets:
-    st.error("FIREBASE_CREDENTIALS not found in secrets.toml.")
+    st.error("Firebase credentials not found in secrets.toml. Please add them and restart the app.")
     st.stop()
-
-# Debug: Print the FIREBASE_CREDENTIALS value
-st.write("FIREBASE_CREDENTIALS:", st.secrets["FIREBASE_CREDENTIALS"])
 
 # Parse the JSON string from secrets.toml
 try:
     firebase_creds = json.loads(st.secrets["FIREBASE_CREDENTIALS"])
 except Exception as e:
-    st.error(f"Failed to parse Firebase credentials: {e}")
+    st.error("Failed to parse Firebase credentials. Please check your secrets.toml file.")
     st.stop()
-
-# Debug: Print the parsed credentials
-st.write("Parsed Firebase Credentials:", firebase_creds)
 
 # Initialize Firebase
 if not firebase_admin._apps:
@@ -50,7 +41,7 @@ if not firebase_admin._apps:
         cred = credentials.Certificate(firebase_creds)
         firebase_admin.initialize_app(cred)
     except Exception as e:
-        st.error(f"Failed to initialize Firebase: {e}")
+        st.error("Failed to initialize Firebase. Please check your Firebase credentials.")
         st.stop()
 
 # Initialize Firebase Storage
@@ -59,7 +50,7 @@ try:
     storage_client = storage.Client.from_service_account_info(firebase_creds)
     bucket = storage_client.bucket(STORAGE_BUCKET_NAME)
 except Exception as e:
-    st.error(f"Failed to initialize Firebase Storage: {e}")
+    st.error("Failed to initialize Firebase Storage. Please check your Firebase credentials.")
     st.stop()
 
 # Initialize Firestore
@@ -69,12 +60,16 @@ db = firestore.client()
 try:
     GENAI_API_KEY = st.secrets["gemini_api_key"]
 except KeyError:
-    st.error("❌ Gemini API key not found in secrets.toml. Please add it and restart the app.")
+    st.error("Gemini API key not found in secrets.toml. Please add it and restart the app.")
     st.stop()
 
 GENAI_MODEL = "gemini-2.0-flash"
 genai.configure(api_key=GENAI_API_KEY)
 model = genai.GenerativeModel(GENAI_MODEL)
+
+# -------------------- Streamlit UI --------------------
+st.title("📜 RaiLChatBot 🤖")
+st.markdown("💬 **Ask me anything about the uploaded files or websites:**")
 
 # -------------------- Sentence Transformer for Embeddings --------------------
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
