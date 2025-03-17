@@ -33,8 +33,12 @@ if not firebase_admin._apps:
 
 # Initialize Firebase Storage
 STORAGE_BUCKET_NAME = "railchatbot-cb553.appspot.com"
-storage_client = storage.Client.from_service_account_info(firebase_creds)
-bucket = storage_client.bucket(STORAGE_BUCKET_NAME)
+try:
+    storage_client = storage.Client.from_service_account_info(firebase_creds)
+    bucket = storage_client.bucket(STORAGE_BUCKET_NAME)
+except Exception as e:
+    st.error(f"Failed to initialize Firebase Storage: {e}")
+    st.stop()
 
 # Initialize Firestore
 db = firestore.client()
