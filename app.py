@@ -20,6 +20,8 @@ from pdf2image import convert_from_path
 
 # -------------------- Firebase Initialization --------------------
 # Load Firebase credentials from Streamlit Secrets
+firebase_creds = None  # Define the variable in the global scope
+
 if not firebase_admin._apps:
     try:
         # Parse the JSON string from secrets.toml
@@ -34,6 +36,8 @@ if not firebase_admin._apps:
 # Initialize Firebase Storage
 STORAGE_BUCKET_NAME = "railchatbot-cb553.appspot.com"
 try:
+    if firebase_creds is None:
+        raise ValueError("Firebase credentials are not defined.")
     storage_client = storage.Client.from_service_account_info(firebase_creds)
     bucket = storage_client.bucket(STORAGE_BUCKET_NAME)
 except Exception as e:
